@@ -1,0 +1,26 @@
+function reverseLookup(ip) {
+  ip = ip.split(".").reverse().join(".")
+  
+  var url = "https://dns.google.com/resolve?name=" + ip + ".in-addr.arpa&type=PTR";
+  var response = UrlFetchApp.fetch(url);
+  var responseCode = response.getResponseCode();
+  if (responseCode !== 200) {
+    throw new Error( responseCode + ": " + response.message );
+  }
+  var responseText = response.getContentText(); // Get the response text
+  var json = JSON.parse(responseText); // Parse the JSON text
+  try{
+    return json.Answer ? json.Answer[0].data : "no data" ;
+}catch(err){
+    return "no data: " + err ;
+  }
+}
+function reverseLookups(ip){
+  ips = ip.split('\n')
+result = ips.map(function(ip) {
+    var res = reverseLookup(ip);
+    return res || "no data"
+  }).join('\n');
+  
+  return result;
+}
